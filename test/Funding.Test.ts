@@ -84,7 +84,7 @@ describe("Funding", function() {
         expect(campaign.id).to.equal(0)
         expect(campaign.owner).to.equal(this.bob.address)
         expect(campaign.target).to.equal(target)
-        expect(campaign.fundTxs.length).to.equal(0)
+        expect(campaign.funded).to.equal(0)
         expect(campaign.startedAt).to.equal(startDate)
         expect(campaign.finishedAt).to.equal(finishDate)
     })
@@ -143,9 +143,7 @@ describe("Funding", function() {
         expect(beforeBalance).to.be.equal(afterBalance.sub(fundSum))
         //expect correct funding entry
         const campaign = await this.funding.getCampaign(0)
-        expect(campaign.fundTxs.length).to.equal(1)
-        expect(campaign.fundTxs[0].amount).to.equal(fundSum)
-        expect(campaign.fundTxs[0].funder).to.equal(this.alice.address)
+        expect(campaign.funded).to.equal(fundSum)
     })
 
     it("cannot withdraw from non-existent campaign", async function(){
