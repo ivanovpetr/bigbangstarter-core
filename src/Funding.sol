@@ -9,7 +9,7 @@ contract Funding is Ownable {
 
     struct Campaign {
         uint256 id;
-        address owner;
+        address collector;
         uint256 target;
         FundTx[] fundTxs;
         uint startedAt;
@@ -21,6 +21,8 @@ contract Funding is Ownable {
         uint256 amount;
         bool filled;
     }
+
+    event CampaignCreated(uint256 id, address owner, uint256 target, uint256 startDate, uint256 finishDate);
 
     Campaign[] public campaigns;
 
@@ -38,18 +40,19 @@ contract Funding is Ownable {
         return c;
     }
 
-    function createCampaign(address owner, uint256 target, uint256 startDate, uint256 finishDate) external onlyOwner returns (uint256) {
+    function createCampaign(address collector, uint256 target, uint256 startDate, uint256 finishDate) external onlyOwner returns (uint256) {
         require(startDate < finishDate, "Invalid dates, startDate later than finishDate");
         require(startDate > block.timestamp, "Start date is in the past");
         require(target > 0, "Invalid target");
-        require(owner != address(0), "Invalid owner");
+        require(collector != address(0), "Invalid collector");
         campaigns.push();
         Campaign storage campaign = campaigns[campaigns.length - 1];
         campaign.id = campaigns.length-1;
-        campaign.owner = owner;
+        campaign.collector = collector;
         campaign.target = target;
         campaign.startedAt = startDate;
         campaign.finishedAt = finishDate;
+        emit CampaignCreated(campaign.id, campaign.collector, campaign.target, campaign.startedAt, campaign.finishedAt);
         return campaigns.length-1;
     }
 
@@ -57,7 +60,7 @@ contract Funding is Ownable {
         Campaign storage campaign = campaigns[campaignId];
         require(block.timestamp > campaign.startedAt, "Campaign is not started yet");
         require(block.timestamp < campaign.finishedAt, "Campaign is already finished");
-        require(msg.sender != campaign.owner, "Owner cannot fund its own campaign");
+        require(msg.sender != campaign.collector, "Owner cannot fund its own campaign");
         campaigns[campaignId].fundTxs.push(FundTx(msg.sender, msg.value, false));
     }
 
@@ -65,8 +68,8 @@ contract Funding is Ownable {
         Campaign storage campaign = campaigns[campaignId];
         require(block.timestamp > campaign.finishedAt, "Campaign is not finished yet");
         uint256 toWithdraw = 0;
-        if (msg.sender == campaign.owner) {
-            require(fundsSum(campaign.fundTxs) > campaign.target,"Campaign is failed, cannot collect funds by owner");
+        if (msg.sender == campaign.collector) {
+            require(fundsSum(campaign.fundTxs) > campaign.target,"Campaign is failed, cannot collect funds by collector");
             for(uint256 i = 0; i < campaign.fundTxs.length; i = i.add(1)) {
                 if (!campaign.fundTxs[i].filled){
                     campaign.fundTxs[i].filled = true;
