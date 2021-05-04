@@ -1,11 +1,14 @@
 import {getNamedAccounts, getUnnamedAccounts, ethers} from 'hardhat';
 import {BigNumber} from 'ethers'
+import {createCampaign, fundCampaign} from "./utils/funding";
 import moment from 'moment'
 import {Funding} from '../typechain'
 
-// function waitFor<T>(p: Promise<{wait: () => Promise<T>}>): Promise<T> {
-//   return p.then((tx) => tx.wait());
-// }
+function sleep(ms: number) {
+  return new Promise((resolve) => {
+    setTimeout(resolve, ms);
+  });
+}
 
 async function main() {
   //const [someone] = await getUnnamedAccounts();
@@ -15,34 +18,54 @@ async function main() {
       'Funding',
       deployer
     );
-
-    const id = await createCampaign(
+    console.log("Creating campaign: finished, filled 100%", moment())
+    const id1 = await createCampaign(
       fundingContract,
       campaignCollector,
       ethers.utils.parseEther('10'),
-      moment().add(1, 'minutes'),
-      moment().add(1, 'days')
+      moment().add(10, 'seconds'),
+      moment().add(30, 'seconds')
     )
-    //console.log(await fundingContract.getCampaign(BigNumber.from(id)));
-    //console.log(id)
+    await sleep(12000)
+    await fundCampaign(fundingContract, deployer, id1, ethers.utils.parseEther('10'))
+    console.log("Creating campaign: finished, filled 20%", moment())
+    const id2 = await createCampaign(
+      fundingContract,
+      campaignCollector,
+      ethers.utils.parseEther('10'),
+      moment().add(10, 'seconds'),
+      moment().add(20, 'seconds')
+    )
+    await sleep(12000)
+    await fundCampaign(fundingContract, deployer, id2, ethers.utils.parseEther('2'))
+    console.log("Creating campaign: in progress, filled 50%")
+    const id3 = await createCampaign(
+      fundingContract,
+      campaignCollector,
+      ethers.utils.parseEther('10'),
+      moment().add(10, 'seconds'),
+      moment().add(20, 'days')
+    )
+    await sleep(12000)
+    await fundCampaign(fundingContract, deployer, id3, ethers.utils.parseEther('5'))
+    console.log("Creating campaign: in progress, filled 0%")
+    const id4 = await createCampaign(
+      fundingContract,
+      campaignCollector,
+      ethers.utils.parseEther('10'),
+      moment().add(10, 'seconds'),
+      moment().add(20, 'days')
+    )
+    console.log("Creating campaign: not started, filled 0%")
+    const id5 = await createCampaign(
+      fundingContract,
+      campaignCollector,
+      ethers.utils.parseEther('10'),
+      moment().add(10, 'days'),
+      moment().add(20, 'days')
+    )
   }
 }
-
-async function createCampaign(fundingContract: Funding, owner: string, target: BigNumber, startDate: moment.Moment, endDate: moment.Moment) {
-  const result = await fundingContract.createCampaign(owner, target, BigNumber.from(startDate.unix()), BigNumber.from(endDate.unix()));
-
-  const receipt = await result.wait()
-
-  console.log(fundingContract.interface.decodeEventLog(fundingContract.interface.getEvent("CampaignCreated"), receipt.logs[0].data, receipt.logs[0].topics).id.toNumber())
-}
-
-// async function fundCampaign() {
-//
-// }
-//
-// async function fillCampaign() {
-//
-// }
 
 main()
   .then(() => process.exit(0))
