@@ -76,7 +76,7 @@ contract Funding is Ownable {
         Campaign storage campaign = campaigns[campaignId];
         require(block.timestamp > campaign.finishedAt, "Campaign is not finished yet");
         if (msg.sender == campaign.owner) {
-            require(campaign.funded > campaign.target, "Campaign is failed, cannot collect funds by owner");
+            require(campaign.funded >= campaign.target, "Campaign is failed, cannot collect funds by owner");
             require(!campaign.collectedByOwner, "Nothing to withdraw");
 
             campaign.collectedByOwner = true;

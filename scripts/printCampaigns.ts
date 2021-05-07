@@ -25,7 +25,7 @@ async function main() {
       const funded = ethers.utils.formatEther(c.funded)
       const target = ethers.utils.formatEther(c.target)
 
-      console.log(`Campaign ${c.id} is ${status} funded ${funded}/${target} owner is ${c.owner}`)
+      console.log(`Campaign ${c.id} is ${status} funded ${funded}/${target} owner is ${c.owner}`, c.funded.gte(c.target))
     }
   }
 }
