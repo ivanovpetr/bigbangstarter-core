@@ -1,4 +1,10 @@
-# Boilerplate for ethereum solidity smart contract development
+# BigBangStarter core
+Project is created for learning only purposes. It is solidity smart contract repo. There is frontend [interface](https://github.com/ivanovpetr/bigbangstarter-interface) for this contract.
+This project is blockchain crowdfunding platform.
+
+##Logic
+Contract owner can create crowdfunding campaign with target in ETH and finish date.
+Users can participate in campaigns. If target is reached before time comes to an end campaign owner can withdraw all funds or if target was not reached participants can get back their ETH.
 
 ## INSTALL
 
